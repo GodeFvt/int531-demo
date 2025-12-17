@@ -8,10 +8,14 @@ import {
 } from './metrics';
 
 export const withMetrics =
-  (handler: (req: NextRequest) => Promise<NextResponse>) =>
+  (handler: (req: NextRequest) => Promise<NextResponse>, route?: string) =>
   async (req: NextRequest) => {
     const start = process.hrtime();
     activeRequests.inc();
+
+    // Use provided route pattern or extract pathname from URL
+    const routeLabel = route || new URL(req.url).pathname;
+
     try {
       const res = await handler(req);
 
@@ -20,19 +24,19 @@ export const withMetrics =
 
       httpRequestsTotal.inc({
         method: req.method,
-        route: req.url || '/',
+        route: routeLabel,
         status: res.status,
       });
 
       httpRequestDurationSeconds.observe(
-        { method: req.method, route: req.url || '/', status: res.status },
+        { method: req.method, route: routeLabel, status: res.status },
         duration
       );
 
       if (res.status >= 500) {
         httpRequestsErrorsTotal.inc({
           method: req.method,
-          route: req.url || '/',
+          route: routeLabel,
           status: res.status,
         });
       }
