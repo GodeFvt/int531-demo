@@ -5,6 +5,10 @@ import { withDbMetrics } from '@/lib/withDbMetrics';
 import { eq, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const runtime = 'nodejs';
+
 const handler = async (req: NextRequest, id: string): Promise<NextResponse> => {
   if (req.method === 'GET') {
     const [student] = await withDbMetrics('select', 'students', () =>
@@ -53,27 +57,26 @@ const handler = async (req: NextRequest, id: string): Promise<NextResponse> => {
   return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
 };
 
-export const GET = (
+export async function GET(
   req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) =>
-  withMetrics(async () => {
-    const { id } = await ctx.params;
-    return handler(req, id);
-  }, '/api/students/:id')(req);
-export const PATCH = (
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+  return withMetrics(async () => handler(req, id), '/api/students/:id')(req);
+}
+
+export async function PATCH(
   req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) =>
-  withMetrics(async () => {
-    const { id } = await ctx.params;
-    return handler(req, id);
-  }, '/api/students/:id')(req);
-export const DELETE = (
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+  return withMetrics(async () => handler(req, id), '/api/students/:id')(req);
+}
+
+export async function DELETE(
   req: NextRequest,
-  ctx: { params: Promise<{ id: string }> }
-) =>
-  withMetrics(async () => {
-    const { id } = await ctx.params;
-    return handler(req, id);
-  }, '/api/students/:id')(req);
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+  return withMetrics(async () => handler(req, id), '/api/students/:id')(req);
+}

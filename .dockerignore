@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+.env
+.env.local
+x-data
+grafana
+README.md
+*.log
+.DS_Store
